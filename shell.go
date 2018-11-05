@@ -2074,7 +2074,10 @@ GLOBAL OPTIONS:
 						}
 
 						var sessions []*Session
-						query := db.Order("created_at desc").Preload("User").Preload("Host")
+
+						limit, offset := 60000, -1
+						query := db.Order("created_at desc").Limit(limit).Offset(offset).Preload("User").Preload("Host")
+
 						if c.Bool("latest") {
 							var session Session
 							if err := query.First(&session).Error; err != nil {
@@ -2084,6 +2087,20 @@ GLOBAL OPTIONS:
 						} else {
 							if err := query.Find(&sessions).Error; err != nil {
 								return err
+							}
+
+							factor := 1
+							for len(sessions) >= limit*factor {
+
+								var additionnalSessions []*Session
+
+								offset = limit * factor
+								query := db.Order("created_at desc").Limit(limit).Offset(offset).Preload("User").Preload("Host")
+								if err := query.Find(&additionnalSessions).Error; err != nil {
+									return err
+								}
+								sessions = append(sessions, additionnalSessions...)
+								factor += 1
 							}
 						}
 						if c.Bool("quiet") {
