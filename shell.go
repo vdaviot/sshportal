@@ -2076,7 +2076,7 @@ GLOBAL OPTIONS:
 
 						var sessions []*Session
 
-						limit, offset, status := 60000, -1, []string{SessionStatusActive, SessionStatusClosed, SessionStatusUnknown}
+						limit, offset, status := 60000, -1, []string{string(SessionStatusActive), string(SessionStatusClosed), string(SessionStatusUnknown)}
 						if c.Bool("active") {
 							status = status[:1]
 						}
